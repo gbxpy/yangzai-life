@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>阳崽存钱助手</title>
+
+<style>
+body{
+    font-family:"Microsoft YaHei",sans-serif;
+    background:#f7f5ee;
+    padding:20px;
+    color:#333;
+}
+
+.card{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:15px;
+}
+
+h1{
+    text-align:center;
+}
+
+button{
+    background:#6aa84f;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:10px;
+}
+
+input{
+    padding:8px;
+    border-radius:8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🌱 阳崽存钱助手</h1>
+<div class="card">
+
+<h2>🌱 今日总览</h2>
+
+<p>
+💰 当前存款：
+<span id="homeMoney">0</span> 元
+</p>
+
+<p>
+🎯 储蓄进度：
+<span id="homePercent">0%</span>
+</p>
+
+<p>
+📦 库存记录：
+<span id="homeStock">0</span> 项
+</p>
+
+<p>
+🛒 购物清单：
+<span id="homeItems">0</span> 项
+</p>
+
+</div>
+<div class="card">
+
+<h2>💰 我的储蓄</h2>
+
+<p>
+当前存款：
+<span id="money">0</span> 元
+</p>
+
+<input id="saveMoney" placeholder="输入金额">
+
+<button onclick="save()">存入</button>
+
+<button onclick="takeMoney()">取出</button>
+
+<button onclick="clearMoney()">清空</button>
+
+<p>
+目标：5000元
+</p>
+
+<div style="background:#ddd;height:20px;border-radius:20px;">
+<div id="bar" style="background:#6aa84f;height:20px;border-radius:20px;width:0%;"></div>
+</div>
+
+<p id="percent">
+完成0%
+</p>
+
+</div>
+<div class="card">
+
+<h2>🛒 购物冷静区</h2>
+
+<input id="item" placeholder="想买什么">
+
+<input id="price" placeholder="多少钱">
+
+<button onclick="addItem()">
+加入冷静期
+</button>
+
+<ul id="list"></ul>
+
+</div>
+
+
+<div class="card">
+
+<h2>📦 我的库存</h2>
+
+<input id="stock" placeholder="例如：洗发水还有2瓶">
+
+<button onclick="addStock()">
+记录库存
+</button>
+
+<ul id="stockList"></ul>
+
+</div>
+<div class="card">
+
+<h2>💼 工资分配</h2>
+
+<input id="salary" placeholder="输入工资">
+
+<button onclick="calculateSalary()">
+自动分配
+</button>
+
+<p id="salaryResult">
+</p>
+
+</div>
+<script>
+
+let money = localStorage.getItem("money") || 0;
+
+let items = JSON.parse(localStorage.getItem("items") || "[]");
+
+let stocks = JSON.parse(localStorage.getItem("stocks") || "[]");
+
+
+function update(){
+
+    document.getElementById("money").innerHTML = money;
+
+    let percent = Math.min(Number(money) / 5000 * 100,100);
+
+    document.getElementById("bar").style.width = percent + "%";
+
+    document.getElementById("percent").innerHTML =
+    "完成 " + percent.toFixed(0) + "%";
+document.getElementById("homeMoney").innerHTML = money;
+
+document.getElementById("homePercent").innerHTML =
+percent.toFixed(0) + "%";
+
+document.getElementById("homeStock").innerHTML =
+stocks.length;
+
+document.getElementById("homeItems").innerHTML =
+items.length;
+}
+
+function addItem(){
+
+    let name = document.getElementById("item").value;
+
+    let price = document.getElementById("price").value;
+
+
+    if(name){
+
+        items.push({
+            name:name,
+            price:price
+        });
+
+        localStorage.setItem("items",JSON.stringify(items));
+
+        showItems();
+
+    }
+
+}
+function save(){
+
+    let num = document.getElementById("saveMoney").value;
+
+    money = Number(money) + Number(num);
+
+    localStorage.setItem("money",money);
+
+    document.getElementById("saveMoney").value="";
+
+    update();
+
+}
+function takeMoney(){
+
+    let num = document.getElementById("saveMoney").value;
+
+    money = Number(money) - Number(num);
+
+    if(money < 0){
+        money = 0;
+    }
+
+    localStorage.setItem("money",money);
+
+    document.getElementById("saveMoney").value="";
+
+    update();
+
+}
+
+
+function clearMoney(){
+
+    money = 0;
+
+    localStorage.setItem("money",money);
+
+    update();
+
+}
+
+function showItems(){
+
+    let html="";
+
+    items.forEach(function(i,index){
+
+        html += "<li>"
+        + i.name
+        + " ￥"
+        + i.price
+        + "（等待72小时） "
+        + "<button onclick='deleteItem(" + index + ")'>删除</button>"
+        + "</li>";
+
+    });
+
+    document.getElementById("list").innerHTML = html;
+
+}
+
+
+function deleteItem(index){
+
+    items.splice(index,1);
+
+    localStorage.setItem("items",JSON.stringify(items));
+
+    showItems();
+
+}
+
+
+function showStock(){
+
+    let html="";
+
+    stocks.forEach(function(s,index){
+
+        html += "<li>"
+        + s
+        + " <button onclick='deleteStock(" + index + ")'>删除</button>"
+        + "</li>";
+
+    });
+
+    document.getElementById("stockList").innerHTML = html;
+
+}
+
+
+function deleteStock(index){
+
+    stocks.splice(index,1);
+
+    localStorage.setItem("stocks",JSON.stringify(stocks));
+
+    showStock();
+
+}
+
+
+function deleteStock(index){
+
+    stocks.splice(index,1);
+
+    localStorage.setItem("stocks",JSON.stringify(stocks));
+
+    showStock();
+
+}
+
+
+function addStock(){
+
+    let s = document.getElementById("stock").value;
+
+    if(s){
+
+        stocks.push(s);
+
+        localStorage.setItem("stocks",JSON.stringify(stocks));
+
+        showStock();
+
+    }
+
+}
+
+
+function showStock(){
+
+    let html="";
+
+    stocks.forEach(function(s,index){
+
+        html += "<li>"
+        + s
+        + " <button onclick='deleteStock(" + index + ")'>删除</button>"
+        + "</li>";
+
+    });
+
+    document.getElementById("stockList").innerHTML = html;
+
+}
+
+
+function deleteStock(index){
+
+    stocks.splice(index,1);
+
+    localStorage.setItem("stocks",JSON.stringify(stocks));
+
+    showStock();
+
+}
+
+
+update();
+
+showItems();
+
+showStock();
+function calculateSalary(){
+
+    let salary = Number(
+        document.getElementById("salary").value
+    );
+
+
+    let save = salary * 0.57;
+
+    let life = salary * 0.29;
+
+    let fun = salary * 0.14;
+
+
+    document.getElementById("salaryResult").innerHTML =
+    "🏦 储蓄：" + save.toFixed(0) + "元<br>" +
+    "🍚 生活：" + life.toFixed(0) + "元<br>" +
+    "🎀 自由消费：" + fun.toFixed(0) + "元";
+
+}
+</script>
+</body>
+</html>
